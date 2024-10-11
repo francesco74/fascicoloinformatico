@@ -242,6 +242,11 @@ def share():
             logger.debug(f"Saga document info (html encoded) result: {request_result.text}")
 
             tree = ET.fromstring(request_result.content)
+            sagaDocumentFaultString = tree.find('.//faultstring')
+            if (sagaDocumentFaultString) is not None:
+                logger.error(f"Saga document faultstring : {sagaDocumentFaultString.text}")
+                raise GenericError(sagaDocumentFaultString.text)
+
             documentInfo = (tree.find('.//docGetInfoReturn').text)
             documentInfoDecoded = html.unescape(documentInfo)
             logger.debug(f"Document info unescaped: {documentInfoDecoded}")
