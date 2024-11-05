@@ -116,7 +116,8 @@ def share():
 
     try:
         now = datetime.datetime.now()
-        
+
+        sha256 = []
         #md5OggettoFascicolo = "" 
         xmlDocumentExtract = ""
         xmlDocumentInfo = ""
@@ -272,6 +273,11 @@ def share():
             sagaDocument = tree.find('.//docExtractReturn').text
             sagaDocumentDecoded = base64.b64decode(sagaDocument)
 
+            # Calcolo lo sha256 del file reso disponibile
+            sha256_hash = hashlib.sha256(sagaDocumentDecoded).hexdigest()
+            logger.debug(f"Computed sha256 value: {sha256_hash}")
+            sha256.append(sha256_hash)
+
             # Scrivo il documento sul file system
             logger.info("Writing document to file system")
             with open(sagaDocumentNameWithDirectory, 'wb') as output_file:
@@ -326,6 +332,7 @@ def share():
                 ##shareTokenMessage = "Condivisione creata correttamente"
                     
                 result['status'] = "ok"
+                result['sha_256'] = ", ".join(sha256)
                 result['url'] = shareTokenUrl
                 result['data_scadenza_share'] = shareExpireRequested
                 result['message'] = "Data published successfully"
@@ -340,6 +347,7 @@ def share():
             
         else:
             result['status'] = "ok"
+            result['sha_256'] = ", ".join(sha256)
             result['message'] = "Folder updated"
 
             result['share_id'] = nextCloudFolderId
